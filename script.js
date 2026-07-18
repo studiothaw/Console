@@ -4,15 +4,6 @@ let selectedIndices = new Set();
 let lastSelectedIndex = null;
 let collapsed = new Set();
 let activeFilters = new Set(); // active [TAG] filters
-let deletionHistory = []; // snapshots saved only on line deletion
-
-// Load saved data
-const saved = localStorage.getItem("entries");
-if (saved) entries = JSON.parse(saved);
-const savedCollapsed = localStorage.getItem("collapsed");
-if (savedCollapsed) collapsed = new Set(JSON.parse(savedCollapsed));
-
-if (entries.length === 0) entries.push(createEntry("", 0));
 
 const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 const DAYS = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
@@ -42,8 +33,6 @@ function getDayStats(realIndex) {
     return { reps, mins };
 }
 
-render();
-
 function createEntry(text, indent = 0) {
     return { id: Date.now() + Math.random(), text, indent, type: "normal" };
 }
@@ -52,10 +41,18 @@ function isSection(entry) {
     return entry.text.startsWith("##");
 }
 
-function save() {
+function saveLocal() {
     localStorage.setItem("entries", JSON.stringify(entries));
     localStorage.setItem("collapsed", JSON.stringify([...collapsed]));
+}
+
+function save() {
+    saveLocal();
     if (typeof renderStats === "function") renderStats();
+    // auto-save to Drive
+    if (typeof saveToDrive === "function" && accessToken) {
+        saveToDrive();
+    }
 }
 
 function getEntryEl(vi) {
@@ -708,6 +705,15 @@ function render() {
 
 // ---- Dashboard ----
 
+
+function initApp() {
+    // Load from localStorage as fallback
+    const saved = localStorage.getItem("entries");
+    if (saved) entries = JSON.parse(saved);
+    const savedCollapsed = localStorage.getItem("collapsed");
+    if (savedCollapsed) collapsed = new Set(JSON.parse(savedCollapsed));
+    if (entries.length === 0) entries.push(createEntry("", 0));
+
 const dashboard = document.getElementById("dashboard");
 const toggle = document.getElementById("dashboard-toggle");
 const btnSave = document.getElementById("btn-save");
@@ -738,18 +744,7 @@ setTimeout(updateLayout, 100);
 window.addEventListener("resize", updateLayout);
 
 btnSave.addEventListener("click", () => {
-    const doc = {
-        name: docTitle.value || "Untitled",
-        savedAt: new Date().toISOString(),
-        entries: entries,
-        collapsed: [...collapsed]
-    };
-    const blob = new Blob([JSON.stringify(doc, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = (docTitle.value || "untitled") + ".json";
-    a.click();
-    URL.revokeObjectURL(a.href);
+    saveToDrive();
 });
 
 btnLoad.addEventListener("click", () => fileInput.click());
@@ -992,3 +987,4 @@ document.getElementById("file-input").addEventListener("change", () => {
 });
 
 renderStats();
+}
