@@ -178,6 +178,7 @@ async function loadFile(fileId) {
         saveLocal();
         render();
         renderStats();
+        updateLayout();
         markClean();
     } catch (err) {
         console.error("Load file error:", err);
