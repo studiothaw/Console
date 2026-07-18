@@ -64,10 +64,15 @@ function onTokenReceived(response) {
     initDrive();
 }
 
+let appInitialized = false;
+
 function showApp() {
     document.getElementById("signin-screen").style.display = "none";
     document.getElementById("main-app").style.display = "block";
-    initApp();
+    if (!appInitialized) {
+        appInitialized = true;
+        initApp();
+    }
 }
 
 // ---- Drive folder + file management ----
@@ -157,20 +162,23 @@ function populateDropdown() {
 
 async function loadFile(fileId) {
     try {
+        // set currentFileId immediately so any pending save goes to right file
+        currentFileId = fileId;
+        sessionStorage.setItem("currentFileId", fileId);
+        document.getElementById("file-dropdown").value = fileId;
+
         const res = await driveRequest(
             `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`
         );
         const doc = await res.json();
         entries = doc.entries || [];
         collapsed = new Set(doc.collapsed || []);
+        activeFilters = new Set();
         if (entries.length === 0) entries.push(createEntry(""));
         saveLocal();
         render();
         renderStats();
         markClean();
-        currentFileId = fileId;
-        sessionStorage.setItem("currentFileId", fileId);
-        document.getElementById("file-dropdown").value = fileId;
     } catch (err) {
         console.error("Load file error:", err);
     }
