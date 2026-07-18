@@ -1,7 +1,7 @@
 // ---- Google Auth + Drive Sync ----
 
 const CLIENT_ID = "610473872-eufjj87q02u997kdt2bo5kpld1prps4m.apps.googleusercontent.com";
-const SCOPES = "https://www.googleapis.com/auth/drive.file";
+const SCOPES = "https://www.googleapis.com/auth/drive";
 const CONSOLE_FOLDER_NAME = "Console";
 
 let accessToken = null;
