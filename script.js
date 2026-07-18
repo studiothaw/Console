@@ -49,10 +49,7 @@ function saveLocal() {
 function save() {
     saveLocal();
     if (typeof renderStats === "function") renderStats();
-    // auto-save to Drive
-    if (typeof saveToDrive === "function" && accessToken) {
-        saveToDrive();
-    }
+    if (typeof markDirty === "function") markDirty();
 }
 
 function getEntryEl(vi) {
@@ -716,14 +713,6 @@ function initApp() {
 
 const dashboard = document.getElementById("dashboard");
 const toggle = document.getElementById("dashboard-toggle");
-const btnSave = document.getElementById("btn-save");
-const btnLoad = document.getElementById("btn-load");
-const fileInput = document.getElementById("file-input");
-const docTitle = document.getElementById("doc-title");
-
-const savedTitle = localStorage.getItem("docTitle");
-if (savedTitle) docTitle.value = savedTitle;
-docTitle.addEventListener("input", () => localStorage.setItem("docTitle", docTitle.value));
 
 let dashOpen = true;
 
@@ -742,46 +731,6 @@ toggle.addEventListener("click", () => {
 
 setTimeout(updateLayout, 100);
 window.addEventListener("resize", updateLayout);
-
-btnSave.addEventListener("click", () => {
-    saveToDrive();
-});
-
-btnLoad.addEventListener("click", () => fileInput.click());
-fileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        try {
-            const doc = JSON.parse(ev.target.result);
-            entries = doc.entries || [];
-            collapsed = new Set(doc.collapsed || []);
-            activeFilters.clear();
-            if (doc.name) { docTitle.value = doc.name; localStorage.setItem("docTitle", doc.name); }
-            if (entries.length === 0) entries.push(createEntry(""));
-            save();
-            render();
-        } catch (err) {
-            alert("Invalid file.");
-        }
-    };
-    reader.readAsText(file);
-    fileInput.value = "";
-});
-
-document.getElementById("btn-new").addEventListener("click", () => {
-    if (!confirm("Start a new document? Unsaved changes will be lost.")) return;
-    entries = [createEntry("", 0)];
-    collapsed = new Set();
-    activeFilters.clear();
-    docTitle.value = "";
-    localStorage.removeItem("docTitle");
-    save();
-    render();
-    renderStats();
-    setTimeout(() => focusEntry(0), 0);
-});
 
 // ---- Stats + Tag Filter ----
 
@@ -982,9 +931,8 @@ function renderStats() {
     setTimeout(updateLayout, 0);
 }
 
-document.getElementById("file-input").addEventListener("change", () => {
-    setTimeout(renderStats, 100);
-});
-
 renderStats();
+initDropdownListener();
+initDashboardButtons();
+markClean();
 }

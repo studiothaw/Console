@@ -21,12 +21,12 @@
 <div id="main-app" style="display:none">
     <div id="dashboard">
         <div id="dashboard-inner">
-            <input id="doc-title" type="text" placeholder="Untitled" spellcheck="false">
+            <select id="file-dropdown" title="Select file"></select>
+            <span id="unsaved-indicator" title="Unsaved changes">●</span>
             <button class="dash-btn" id="btn-new">New</button>
             <button class="dash-btn" id="btn-save">Save</button>
-            <button class="dash-btn" id="btn-load">Load</button>
+            <button class="dash-btn" id="btn-refresh">Refresh</button>
             <button class="dash-btn" id="btn-signout">Sign Out</button>
-            <input type="file" id="file-input" accept=".json" style="display:none">
         </div>
         <div id="dashboard-stats"></div>
     </div>
@@ -35,7 +35,6 @@
 </div>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://apis.google.com/js/api.js"></script>
 <script src="auth.js"></script>
 <script src="script.js"></script>
 
