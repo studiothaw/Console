@@ -141,8 +141,9 @@ async function initDrive() {
             document.getElementById("file-dropdown").value = currentFileId;
             await loadFile(currentFileId);
         } else {
-            // no files yet, prompt to create first one
-            promptNewFile(true);
+            // no files yet, start with blank slate
+            render();
+            renderStats();
         }
     } catch (err) {
         console.error("Drive init error:", err);
