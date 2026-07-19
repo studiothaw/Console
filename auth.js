@@ -85,6 +85,27 @@ async function driveRequest(url, options = {}) {
             ...(options.headers || {})
         }
     });
+    // token expired — silently refresh and retry once
+    if (res.status === 401) {
+        await new Promise((resolve) => {
+            tokenClient.callback = async (response) => {
+                if (!response.error) {
+                    accessToken = response.access_token;
+                    sessionStorage.setItem("gAccessToken", accessToken);
+                }
+                resolve();
+            };
+            tokenClient.requestAccessToken({ prompt: "" });
+        });
+        // retry with new token
+        return fetch(url, {
+            ...options,
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                ...(options.headers || {})
+            }
+        });
+    }
     return res;
 }
 
