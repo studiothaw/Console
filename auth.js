@@ -32,7 +32,7 @@ function initGoogleAuth() {
         callback: onTokenReceived,
     });
 
-    const savedToken = sessionStorage.getItem("gAccessToken");
+    const savedToken = localStorage.getItem("gAccessToken");
     if (savedToken) {
         accessToken = savedToken;
         showApp();
@@ -49,8 +49,8 @@ function initGoogleAuth() {
         currentFileId = null;
         consoleFolderId = null;
         driveFiles = [];
-        sessionStorage.removeItem("gAccessToken");
-        sessionStorage.removeItem("currentFileId");
+        localStorage.removeItem("gAccessToken");
+        localStorage.removeItem("currentFileId");
         document.getElementById("main-app").style.display = "none";
         document.getElementById("signin-screen").style.display = "flex";
     });
@@ -59,7 +59,7 @@ function initGoogleAuth() {
 function onTokenReceived(response) {
     if (response.error) { console.error(response); return; }
     accessToken = response.access_token;
-    sessionStorage.setItem("gAccessToken", accessToken);
+    localStorage.setItem("gAccessToken", accessToken);
     showApp();
     initDrive();
 }
@@ -91,7 +91,7 @@ async function driveRequest(url, options = {}) {
             tokenClient.callback = async (response) => {
                 if (!response.error) {
                     accessToken = response.access_token;
-                    sessionStorage.setItem("gAccessToken", accessToken);
+                    localStorage.setItem("gAccessToken", accessToken);
                 }
                 resolve();
             };
@@ -152,7 +152,7 @@ async function initDrive() {
         populateDropdown();
 
         // restore last used file
-        const lastFileId = sessionStorage.getItem("currentFileId");
+        const lastFileId = localStorage.getItem("currentFileId");
         if (lastFileId && driveFiles.find(f => f.id === lastFileId)) {
             currentFileId = lastFileId;
             document.getElementById("file-dropdown").value = currentFileId;
@@ -186,7 +186,7 @@ async function loadFile(fileId) {
     try {
         // set currentFileId immediately so any pending save goes to right file
         currentFileId = fileId;
-        sessionStorage.setItem("currentFileId", fileId);
+        localStorage.setItem("currentFileId", fileId);
         document.getElementById("file-dropdown").value = fileId;
 
         const res = await driveRequest(
