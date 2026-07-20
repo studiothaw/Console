@@ -660,9 +660,19 @@ function render() {
             wrapper.appendChild(div);
             const count = countDescendants(realIndex);
             const { reps, mins } = getDayStats(realIndex);
+
+            // count child lines starting with -
+            let incompleteCount = 0;
+            for (let i = realIndex + 1; i < entries.length; i++) {
+                if (entries[i].indent === 0) break;
+                if (entries[i].text.startsWith("-")) incompleteCount++;
+            }
+
             const badge = document.createElement("span");
             badge.className = "child-count";
-            let badgeText = count > 0 ? `— ${String(count).padStart(2, "0")}` : "";
+            let badgeText = "";
+            if (incompleteCount > 0) badgeText += `(${incompleteCount}) `;
+            badgeText += count > 0 ? `— ${String(count).padStart(2, "0")}` : "";
             if (reps > 0 || mins > 0) {
                 badgeText += badgeText ? " | " : "| ";
                 if (reps > 0) badgeText += `${reps}R `;
