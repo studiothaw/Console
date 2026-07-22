@@ -46,12 +46,12 @@ body {
 }
 
 .line.today {
-    border-left: 2px solid #c8a84b;
-    background: #1f1c13;
+    border-left: 4px solid #a9e746;
+    background: #474747;
 }
 
 .line.today .entry {
-    color: #d4b96a;
+    color: #d4d4d4;
 }
 
 .line.today .entry:focus {
@@ -59,7 +59,7 @@ body {
 }
 
 .line.today .child-count {
-    color: #6b5a2a;
+    color: #000000;
 }
 
 .dot {
@@ -116,7 +116,7 @@ body {
     left: 0;
     right: 0;
     z-index: 100;
-    background: #161616;
+    background: #131217;
     border-bottom: 1px solid #2a2a2a;
     overflow: hidden;
     transition: max-height 0.25s ease;
@@ -206,12 +206,12 @@ body {
 }
 
 .stat-tag {
-    color: #aaa;
-    background: #2a2a2a;
-    border: 1px solid #3a3a3a;
-    border-radius: 3px;
-    padding: 1px 6px;
-    font-size: 10px;
+    color: #131217;
+    background: #85858e;
+    border: 1px solid #85858e;
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 11px;
 }
 
 .stat-empty {
@@ -230,10 +230,10 @@ body {
 .section-header {
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #333;
-    border-top: 1px solid #333;
-    margin-top: 4px;
-    background: #1a1a1a;
+    border-bottom: 1px solid #131217;
+    border-top: 1px solid #131217;
+    margin-top: 1px;
+    background: #131217;
 }
 
 .section-toggle {
@@ -253,14 +253,14 @@ body {
     flex: 1;
     padding: 4px 6px;
     outline: none;
-    color: #888;
+    color: #aaa;
     font-size: 13px;
     letter-spacing: 0.08em;
-    caret-color: #d4d4d4;
+    caret-color: #aaa;
 }
 
 .section-label:focus {
-    color: #aaa;
+    color: #85858e;
 }
 
 /* ---- Tag filter ---- */
@@ -276,24 +276,24 @@ body {
 }
 
 .stat-filter-active .stat-tag {
-    background: #1a3a5c;
-    border-color: #2a5a8c;
-    color: #6aabdf;
+    background: #a9e746;
+    border-color: #a9e746;
+    color: #131217;
 }
 
 .stat-filter-active {
-    color: #6aabdf;
+    color: #a9e746;
 }
 
 .filter-context {
-    opacity: 0.45;
+    opacity: 0.2;
 }
 
 /* ---- Calendar popup ---- */
 #cal-popup {
     position: absolute;
     z-index: 200;
-    background: #1a1a1a;
+    background: #131217;
     border: 1px solid #3a3a3a;
     border-radius: 4px;
     padding: 8px;
@@ -310,13 +310,13 @@ body {
 .cal-daylabel { color:#555; text-align:center; font-size:9px; padding:2px 0; }
 .cal-day { text-align:center; padding:3px 2px; color:#888; cursor:pointer; border-radius:2px; }
 .cal-day:hover { background:#2a2a2a; color:#d4d4d4; }
-.cal-today { color:#c8a84b; border:1px solid #c8a84b44; }
+.cal-today { color:#a9e746; border:1px solid #c8a84b44; }
 
 /* ---- Tag context menu ---- */
 #tag-context-menu {
     position: fixed;
     z-index: 300;
-    background: #1a1a1a;
+    background: #131217;
     border: 1px solid #3a3a3a;
     border-radius: 4px;
     padding: 4px 0;
@@ -343,7 +343,7 @@ body {
 
 .tag-rename-input {
     background: #2a2a2a;
-    border: 1px solid #4a7aab;
+    border: 1px solid #a9e746;
     border-radius: 3px;
     color: #d4d4d4;
     font-family: 'Fira Code', monospace;
@@ -374,7 +374,7 @@ body {
 
 .tag-rename-input {
     background: #2a2a2a;
-    border: 1px solid #4a7aab;
+    border: 1px solid #a9e746;
     border-radius: 3px;
     color: #d4d4d4;
     font-family: 'Fira Code', monospace;
@@ -447,7 +447,7 @@ body {
 }
 
 #unsaved-indicator {
-    color: #c8a84b;
+    color: #a9e746;
     font-size: 10px;
     display: none;
     margin-left: -4px;
@@ -476,17 +476,17 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .timer-current {
-    color: #d4d4d4;
+    color: #555;
     letter-spacing: 0.04em;
 }
 
 .timer-longest {
     color: #555;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .timer-stopped {
