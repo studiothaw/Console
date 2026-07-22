@@ -567,7 +567,7 @@ function render() {
         div.className = "entry";
         div.contentEditable = true;
         div.innerText = entry.text;
-        if (entry.indent > 0) div.style.color = "#9a9a9a";
+        if (entry.indent > 0) div.style.color = "#7c7c7c";
         if (entry.indent === 0) div.style.flex = "0 1 auto";
 
         // calendar click on day lines
