@@ -465,3 +465,26 @@ body {
     box-shadow: 0 4px 16px rgba(0,0,0,0.5);
     font-family: 'Fira Code', monospace;
 }
+
+/* ---- Timers ---- */
+.timer-row {
+    flex-direction: column;
+    gap: 4px;
+}
+
+.timer-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.timer-current {
+    color: #d4d4d4;
+    letter-spacing: 0.04em;
+}
+
+.timer-longest {
+    color: #555;
+    font-size: 10px;
+}

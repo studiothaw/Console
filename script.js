@@ -744,6 +744,91 @@ window.addEventListener("resize", updateLayout);
 
 // ---- Stats + Tag Filter ----
 
+// ---- Timer system (~Word) ----
+
+function parseTimerEntries() {
+    // Returns map of word -> { currentStartMs, longestMins, stopped }
+    const TILDE_RE = /~([A-Za-z]+)(~)?/g;
+    const timers = {};
+
+    for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        let match;
+        TILDE_RE.lastIndex = 0;
+        while ((match = TILDE_RE.exec(entry.text)) !== null) {
+            const word = match[1];
+            const stopped = !!match[2]; // ~Word~ stops timer
+
+            // find parent day line
+            let parentDay = null;
+            for (let j = i - 1; j >= 0; j--) {
+                if (entries[j].indent === 0 && !isSection(entries[j])) {
+                    parentDay = entries[j];
+                    break;
+                }
+            }
+            if (!parentDay) continue;
+
+            // parse date from parent day text: YYYY MMM DD DAY
+            const dateMatch = parentDay.text.match(/^(\d{4})\s+([A-Z]{3})\s+(\d{2})/);
+            if (!dateMatch) continue;
+            const year = parseInt(dateMatch[1]);
+            const month = MONTHS.indexOf(dateMatch[2]);
+            const day = parseInt(dateMatch[3]);
+            if (month === -1) continue;
+
+            // check for HHMM on same line
+            const timeMatch = entry.text.match(/\b(\d{2})(\d{2})\b/);
+            let startMs;
+            if (timeMatch) {
+                const h = parseInt(timeMatch[1]);
+                const m = parseInt(timeMatch[2]);
+                if (h <= 23 && m <= 59) {
+                    startMs = new Date(year, month, day, h, m).getTime();
+                } else {
+                    startMs = new Date(year, month, day, 0, 0).getTime();
+                }
+            } else {
+                startMs = new Date(year, month, day, 0, 0).getTime();
+            }
+
+            if (!timers[word]) {
+                timers[word] = { currentStartMs: null, longestMins: 0, stopped: false };
+            }
+
+            const t = timers[word];
+
+            if (stopped) {
+                // ~Word~ ends the timer
+                if (t.currentStartMs !== null) {
+                    const durMins = Math.floor((startMs - t.currentStartMs) / 60000);
+                    if (durMins > t.longestMins) t.longestMins = durMins;
+                    t.currentStartMs = null;
+                    t.stopped = true;
+                }
+            } else if (t.currentStartMs !== null) {
+                // relapse — close previous run, start new
+                const durMins = Math.floor((startMs - t.currentStartMs) / 60000);
+                if (durMins > t.longestMins) t.longestMins = durMins;
+                t.currentStartMs = startMs;
+                t.stopped = false;
+            } else {
+                // first occurrence
+                t.currentStartMs = startMs;
+                t.stopped = false;
+            }
+        }
+    }
+    return timers;
+}
+
+function formatDuration(mins) {
+    const d = Math.floor(mins / (60 * 24));
+    const h = Math.floor((mins % (60 * 24)) / 60);
+    const m = mins % 60;
+    return `${String(d).padStart(3, "0")}D ${String(h).padStart(2, "0")}H ${String(m).padStart(2, "0")}M`;
+}
+
 function computeStats() {
     const tagTotals = {};
     for (const entry of entries) {
@@ -896,6 +981,29 @@ function renderStats() {
     // Add Week button in stats area
     html += `<div class="stat-row"><button class="dash-btn" id="btn-add-week-inline">Add Week</button></div>`;
 
+    // Timer display (~Word)
+    const timers = parseTimerEntries();
+    const timerWords = Object.keys(timers).sort();
+    if (timerWords.length > 0) {
+        html += `<div class="stat-row timer-row">`;
+        for (const word of timerWords) {
+            const t = timers[word];
+            let currentMins = 0;
+            if (t.currentStartMs !== null && !t.stopped) {
+                currentMins = Math.floor((Date.now() - t.currentStartMs) / 60000);
+            }
+            const current = formatDuration(currentMins);
+            let timerHtml = `<span class="timer-item">`;
+            timerHtml += `<span class="timer-current">${current} ${word}</span>`;
+            if (t.longestMins > 0) {
+                timerHtml += ` <span class="timer-longest">| ${formatDuration(t.longestMins)}</span>`;
+            }
+            timerHtml += `</span>`;
+            html += timerHtml;
+        }
+        html += `</div>`;
+    }
+
     if (sortedTags.length > 0) {
         html += `<div class="stat-row">`;
         for (const tag of sortedTags) {
@@ -943,6 +1051,12 @@ function renderStats() {
 
 renderStats();
 initDropdownListener();
+
+// tick timer display every minute
+setInterval(() => {
+    const timers = parseTimerEntries();
+    if (Object.keys(timers).length > 0) renderStats();
+}, 60000);
 initDashboardButtons();
 markClean();
 }
