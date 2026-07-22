@@ -488,3 +488,7 @@ body {
     color: #555;
     font-size: 10px;
 }
+
+.timer-stopped {
+    color: #555;
+}
