@@ -986,14 +986,22 @@ function renderStats() {
         for (const word of timerWords) {
             const t = timers[word];
             let currentMins = 0;
-            if (t.currentStartMs !== null && !t.stopped) {
+            let isStopped = t.stopped || t.currentStartMs === null;
+            if (!isStopped) {
                 currentMins = Math.floor((Date.now() - t.currentStartMs) / 60000);
+            } else {
+                // use longestMins as the completed duration if stopped with no new run
+                currentMins = t.longestMins;
             }
             const current = formatDuration(currentMins);
             let timerHtml = `<span class="timer-item">`;
-            timerHtml += `<span class="timer-current">${current} ${word}</span>`;
-            if (t.longestMins > 0) {
-                timerHtml += ` <span class="timer-longest">| ${formatDuration(t.longestMins)}</span>`;
+            if (isStopped) {
+                timerHtml += `<span class="timer-current timer-stopped">${current} ${word} ✓</span>`;
+            } else {
+                timerHtml += `<span class="timer-current">${current} ${word}</span>`;
+                if (t.longestMins > 0) {
+                    timerHtml += ` <span class="timer-longest">| ${formatDuration(t.longestMins)}</span>`;
+                }
             }
             timerHtml += `</span>`;
             html += timerHtml;
