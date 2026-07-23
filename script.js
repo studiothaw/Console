@@ -690,6 +690,7 @@ function render() {
             }
             badge.textContent = badgeText;
 
+            wrapper.appendChild(badge);
             if (incompleteCount > 0) {
                 const circle = document.createElement("span");
                 circle.className = "incomplete-circle";
@@ -697,7 +698,6 @@ function render() {
                 wrapper.appendChild(circle);
             }
             
-            wrapper.appendChild(badge);
             row.appendChild(wrapper);
         } else {
             row.appendChild(div);
