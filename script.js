@@ -1007,9 +1007,9 @@ function renderStats() {
             const current = formatDuration(currentMins);
             let timerHtml = `<span class="timer-item">`;
             if (isStopped) {
-                timerHtml += `<span class="timer-current timer-stopped">${current} ${word} ✓</span>`;
+                timerHtml += `<span class="timer-current timer-stopped">${word} ${current} ✓</span>`;
             } else {
-                timerHtml += `<span class="timer-current">${current} ${word}</span>`;
+                timerHtml += `<span class="timer-current">${word} ${current}</span>`;
                 if (t.longestMins > 0) {
                     timerHtml += ` <span class="timer-longest">| ${formatDuration(t.longestMins)}</span>`;
                 }

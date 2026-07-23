@@ -479,15 +479,17 @@ body {
 }
 
 .timer-current {
-    color: #555;
+    color: #888;
+    font-size: 12px;
     letter-spacing: 0.04em;
 }
 
 .timer-longest {
-    color: #555;
+    color: #888;
     font-size: 12px;
+    letter-spacing: 0.04em;
 }
 
 .timer-stopped {
-    color: #555;
+    color: #888;
 }
