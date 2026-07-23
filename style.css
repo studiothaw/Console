@@ -524,3 +524,26 @@ body {
     margin-right: 4px;
     flex-shrink: 0;
 }
+
+.btn-circle-active {
+    background: #a9e746;
+    border-color: #a9e746;
+    color: #131217;
+}
+
+.btn-circle-active:hover {
+    background: #bef56a;
+    color: #131217;
+}
+
+/* ---- Archived tags ---- */
+.stat-filter-archived .stat-tag {
+    background: #2a2a2a;
+    border-color: #3a3a3a;
+    color: #555;
+    opacity: 0.6;
+}
+
+#btn-toggle-archived {
+    font-size: 16px;
+}

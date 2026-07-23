@@ -3,7 +3,9 @@ let entries = [];
 let selectedIndices = new Set();
 let lastSelectedIndex = null;
 let collapsed = new Set();
-let activeFilters = new Set(); // active [TAG] filters
+let activeFilters = new Set();
+let archivedTags = new Set();
+let showArchivedTags = false; // active [TAG] filters
 
 const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 const DAYS = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
@@ -897,15 +899,33 @@ function showTagContextMenu(x, y, tag) {
     deleteBtn.addEventListener("mousedown", (e) => {
         e.stopPropagation();
         hideTagContextMenu();
-        // remove [TAG] from all entries
+        // remove only the [TAG] brackets, keep the word
         entries.forEach(entry => {
-            entry.text = entry.text.replace(new RegExp(`\\[${tag}\\]`, "g"), "").replace(/\s+/g, " ").trim();
+            entry.text = entry.text.replace(new RegExp(`\\[${tag}\\]`, "g"), tag).replace(/\s+/g, " ").trim();
         });
         activeFilters.delete(tag);
+        archivedTags.delete(tag);
         save(); render();
     });
 
+    const archiveBtn = document.createElement("div");
+    archiveBtn.className = "ctx-item";
+    archiveBtn.textContent = archivedTags.has(tag) ? "Unarchive" : "Archive";
+    archiveBtn.addEventListener("mousedown", (e) => {
+        e.stopPropagation();
+        hideTagContextMenu();
+        if (archivedTags.has(tag)) {
+            archivedTags.delete(tag);
+        } else {
+            archivedTags.add(tag);
+            activeFilters.delete(tag);
+        }
+        renderStats();
+        updateLayout();
+    });
+
     menu.appendChild(renameBtn);
+    menu.appendChild(archiveBtn);
     menu.appendChild(deleteBtn);
     document.body.appendChild(menu);
 
@@ -992,8 +1012,10 @@ function renderStats() {
 
     let html = "";
 
-    // Add Week button in stats area
-    html += `<div class="stat-row"><button class="dash-btn btn-circle" id="btn-add-week-inline">+W</button></div>`;
+    // Add Week + eye toggle buttons
+    const eyeIcon = showArchivedTags ? "👁" : "·";
+    const eyeActive = showArchivedTags ? " btn-circle-active" : "";
+    html += `<div class="stat-row"><button class="dash-btn btn-circle" id="btn-add-week-inline">+W</button><button class="dash-btn btn-circle${eyeActive}" id="btn-toggle-archived" title="Show archived tags">${eyeIcon}</button></div>`;
 
     // Timer display (~Word)
     const timers = parseTimerEntries();
@@ -1027,14 +1049,19 @@ function renderStats() {
     }
 
     if (sortedTags.length > 0) {
-        html += `<div class="stat-row">`;
-        for (const tag of sortedTags) {
-            const active = activeFilters.has(tag);
-            html += `<span class="stat-item stat-filter${active ? " stat-filter-active" : ""}" data-tag="${tag}">`;
-            html += `<span class="stat-tag">${tag}</span>${tagTotals[tag] > 0 ? " " + formatHours(tagTotals[tag]) : ""}`;
-            html += `</span>`;
+        const visibleTags = sortedTags.filter(t => showArchivedTags || !archivedTags.has(t));
+        const hiddenTags = sortedTags.filter(t => archivedTags.has(t));
+        if (visibleTags.length > 0) {
+            html += `<div class="stat-row">`;
+            for (const tag of visibleTags) {
+                const active = activeFilters.has(tag);
+                const archived = archivedTags.has(tag);
+                html += `<span class="stat-item stat-filter${active ? " stat-filter-active" : ""}${archived ? " stat-filter-archived" : ""}" data-tag="${tag}">`;
+                html += `<span class="stat-tag">${tag}</span>${tagTotals[tag] > 0 ? " " + formatHours(tagTotals[tag]) : ""}`;
+                html += `</span>`;
+            }
+            html += `</div>`;
         }
-        html += `</div>`;
     }
 
     if (sortedTags.length === 0) html += `<span class="stat-empty">no tracked entries</span>`;
@@ -1051,6 +1078,12 @@ function renderStats() {
             if (!exists) entries.push(createEntry(formatted, 0));
         }
         save(); render();
+    });
+
+    document.getElementById("btn-toggle-archived").addEventListener("click", () => {
+        showArchivedTags = !showArchivedTags;
+        renderStats();
+        updateLayout();
     });
 
     // attach filter click + right-click handlers
