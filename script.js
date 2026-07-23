@@ -993,7 +993,7 @@ function renderStats() {
     let html = "";
 
     // Add Week button in stats area
-    html += `<div class="stat-row"><button class="dash-btn" id="btn-add-week-inline">Add Week</button></div>`;
+    html += `<div class="stat-row"><button class="dash-btn btn-circle" id="btn-add-week-inline">+W</button></div>`;
 
     // Timer display (~Word)
     const timers = parseTimerEntries();
