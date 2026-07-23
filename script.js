@@ -681,9 +681,7 @@ function render() {
 
             const badge = document.createElement("span");
             badge.className = "child-count";
-            let badgeText = "";
-            if (incompleteCount > 0) badgeText += `(${incompleteCount}) `;
-            badgeText += count > 0 ? `— ${String(count).padStart(2, "0")}` : "";
+            let badgeText = count > 0 ? `— ${String(count).padStart(2, "0")}` : "";
             if (reps > 0 || mins > 0) {
                 badgeText += badgeText ? " | " : "| ";
                 if (reps > 0) badgeText += `${reps}R `;
@@ -691,6 +689,14 @@ function render() {
                 badgeText = badgeText.trimEnd();
             }
             badge.textContent = badgeText;
+
+            if (incompleteCount > 0) {
+                const circle = document.createElement("span");
+                circle.className = "incomplete-circle";
+                circle.textContent = incompleteCount;
+                wrapper.appendChild(circle);
+            }
+            
             wrapper.appendChild(badge);
             row.appendChild(wrapper);
         } else {

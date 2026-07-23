@@ -493,3 +493,20 @@ body {
 .timer-stopped {
     color: #888;
 }
+
+/* ---- Incomplete circle ---- */
+
+.incomplete-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #131217;
+    color: #888;
+    font-size: 12px;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
