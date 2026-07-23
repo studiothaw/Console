@@ -38,7 +38,12 @@ function createEntry(text, indent = 0) {
 }
 
 function isSection(entry) {
-    return entry.text.startsWith("##");
+    return /^#{1,3}\s/.test(entry.text) || /^#{1,3}$/.test(entry.text.trim());
+}
+
+function getSectionLevel(entry) {
+    const match = entry.text.match(/^(#{1,3})/);
+    return match ? match[1].length : 0;
 }
 
 function saveLocal() {
@@ -146,6 +151,7 @@ function getVisibleEntries() {
     const visible = [];
     let skipAbove = null;
     let skipSection = false;
+    let skipSectionLevel = 0;
 
     // if filters active, collect matching real indices + their parent day lines
     let filterSet = null;
@@ -167,8 +173,11 @@ function getVisibleEntries() {
         const entry = entries[i];
 
         if (skipSection) {
-            if (isSection(entry)) skipSection = false;
-            else continue;
+            if (isSection(entry) && getSectionLevel(entry) <= skipSectionLevel) {
+                skipSection = false;
+            } else {
+                continue;
+            }
         }
 
         if (skipAbove !== null) {
@@ -183,6 +192,7 @@ function getVisibleEntries() {
 
         if (isSection(entry) && collapsed.has(entry.id)) {
             skipSection = true;
+            skipSectionLevel = getSectionLevel(entry);
             continue;
         }
 
@@ -582,7 +592,7 @@ function render() {
                 const text = div.innerText.trim();
                 if (MONTHS.some(m => text.toUpperCase() === m)) showCalendar(div, realIndex);
             }
-            if (div.innerText.startsWith("##")) {
+            if (/^#{1,3}/.test(div.innerText)) {
                 save(); render();
                 setTimeout(() => {
                     const el = app.children[vi]?.querySelector(".section-label");
