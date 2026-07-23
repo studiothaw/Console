@@ -45,7 +45,7 @@ body {
 }
 
 .line.today {
-    border-left: 4px solid #a9e746;
+    box-shadow: inset 4px 0 0 #a9e746;
     background: #474747;
 }
 
