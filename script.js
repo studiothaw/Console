@@ -602,10 +602,7 @@ function render() {
                 }, 0);
                 return;
             }
-            saveLocal();
-            markDirty();
-            // update stats when a tag bracket is closed
-            if (div.innerText.includes("]")) renderStats();
+            save();
         });
 
         div.addEventListener("keydown", (e) => {
@@ -633,7 +630,7 @@ function render() {
             if (e.key === "Enter") {
                 e.preventDefault();
                 entries.splice(realIndex + 1, 0, createEntry("", entries[realIndex].indent || 0));
-                save(); render(); renderStats();
+                save(); render();
                 setTimeout(() => focusEntry(vi + 1), 0);
                 return;
             }
