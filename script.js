@@ -589,7 +589,6 @@ function render() {
 
         div.addEventListener("input", () => {
             entries[realIndex].text = div.innerText;
-            if (typeof renderStats === "function") renderStats();
             // show calendar when typing a month on indent-0
             if (entry.indent === 0) {
                 const text = div.innerText.trim();
