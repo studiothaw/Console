@@ -296,8 +296,6 @@ function hideCalendar() {
     calendarTarget = null;
 }
 
-let statsDebounce = null;
-
 function render() {
     app.innerHTML = "";
     const visible = getVisibleEntries();
@@ -591,6 +589,7 @@ function render() {
 
         div.addEventListener("input", () => {
             entries[realIndex].text = div.innerText;
+            // show calendar when typing a month on indent-0
             if (entry.indent === 0) {
                 const text = div.innerText.trim();
                 if (MONTHS.some(m => text.toUpperCase() === m)) showCalendar(div, realIndex);
@@ -603,13 +602,10 @@ function render() {
                 }, 0);
                 return;
             }
+            saveLocal();
             markDirty();
-            // debounce stats update — fires 400ms after you stop typing
-            clearTimeout(statsDebounce);
-            statsDebounce = setTimeout(() => {
-                saveLocal();
-                if (typeof renderStats === "function") renderStats();
-            }, 400);
+            // update stats when a tag bracket is closed
+            if (div.innerText.includes("]")) renderStats();
         });
 
         div.addEventListener("keydown", (e) => {
@@ -637,7 +633,7 @@ function render() {
             if (e.key === "Enter") {
                 e.preventDefault();
                 entries.splice(realIndex + 1, 0, createEntry("", entries[realIndex].indent || 0));
-                save(); render();
+                save(); render(); renderStats();
                 setTimeout(() => focusEntry(vi + 1), 0);
                 return;
             }
