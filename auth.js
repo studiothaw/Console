@@ -199,8 +199,8 @@ async function loadFile(fileId) {
         if (entries.length === 0) entries.push(createEntry(""));
         saveLocal();
         render();
-        renderStats();
-        updateLayout();
+        if (typeof renderStats === "function") renderStats();
+        if (typeof updateLayout === "function") updateLayout();
         markClean();
     } catch (err) {
         console.error("Load file error:", err);
