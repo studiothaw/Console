@@ -5,7 +5,8 @@ let lastSelectedIndex = null;
 let collapsed = new Set();
 let activeFilters = new Set();
 let archivedTags = new Set();
-let showArchivedTags = false; // active [TAG] filters
+let showArchivedTags = false;
+let searchTerm = ""; // active [TAG] filters
 
 const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 const DAYS = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
@@ -157,14 +158,19 @@ function getVisibleEntries() {
 
     // if filters active, collect matching real indices + their parent day lines
     let filterSet = null;
-    if (activeFilters.size > 0) {
+    if (activeFilters.size > 0 || searchTerm) {
         filterSet = new Set();
         for (let i = 0; i < entries.length; i++) {
-            const tags = extractTags(entries[i].text);
-            const matches = tags.some(t => activeFilters.has(t));
+            let matches = false;
+            if (activeFilters.size > 0) {
+                const tags = extractTags(entries[i].text);
+                matches = tags.some(t => activeFilters.has(t));
+            }
+            if (!matches && searchTerm) {
+                matches = entries[i].text.toLowerCase().includes(searchTerm.toLowerCase());
+            }
             if (matches) {
                 filterSet.add(i);
-                // add parent day line for context
                 const parentDay = findParentDay(i);
                 if (parentDay !== null) filterSet.add(parentDay);
             }
@@ -984,7 +990,8 @@ function renderStats() {
     // Add Week + eye toggle buttons
     const eyeIcon = showArchivedTags ? "👁" : "·";
     const eyeActive = showArchivedTags ? " btn-circle-active" : "";
-    html += `<div class="stat-row"><button class="dash-btn btn-circle" id="btn-add-week-inline">+W</button><button class="dash-btn btn-circle${eyeActive}" id="btn-toggle-archived" title="Show archived tags">${eyeIcon}</button></div>`;
+    const searchActive = searchTerm ? " btn-circle-active" : "";
+    html += `<div class="stat-row" style="align-items:center;gap:8px;"><button class="dash-btn btn-circle" id="btn-add-week-inline">W</button><button class="dash-btn btn-circle${eyeActive}" id="btn-toggle-archived" title="Show archived tags">${eyeIcon}</button><button class="dash-btn btn-circle${searchActive}" id="btn-search-toggle" title="Search">/</button><input type="text" id="search-input" class="search-input" placeholder="" value="${searchTerm.replace(/"/g,'&quot;')}"></div>`;
 
     // Timer display (~Word)
     const timers = parseTimerEntries();
@@ -1055,6 +1062,48 @@ function renderStats() {
         updateLayout();
     });
 
+    const searchBtn = document.getElementById("btn-search-toggle");
+    const searchInput = document.getElementById("search-input");
+
+    searchBtn.addEventListener("click", () => {
+        if (searchInput.style.width === "0px" || !searchInput.style.width) {
+            searchInput.style.width = "160px";
+            searchInput.style.opacity = "1";
+            searchInput.focus();
+        } else {
+            searchInput.style.width = "0px";
+            searchInput.style.opacity = "0";
+            searchTerm = "";
+            render();
+            renderStats();
+        }
+    });
+
+    searchInput.addEventListener("input", () => {
+        searchTerm = searchInput.value;
+        render();
+        updateLayout();
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            searchTerm = "";
+            searchInput.style.width = "0px";
+            searchInput.style.opacity = "0";
+            render();
+            renderStats();
+        }
+    });
+
+    // restore search input visibility if active
+    if (searchTerm) {
+        searchInput.style.width = "160px";
+        searchInput.style.opacity = "1";
+    } else {
+        searchInput.style.width = "0px";
+        searchInput.style.opacity = "0";
+    }
+
     // attach filter click + right-click handlers
     statsEl.querySelectorAll(".stat-filter").forEach(el => {
         el.addEventListener("click", () => {
@@ -1073,6 +1122,10 @@ function renderStats() {
     setTimeout(updateLayout, 0);
 }
 
+const dashboard = document.getElementById("dashboard");
+const toggle = document.getElementById("dashboard-toggle");
+let dashOpen = true;
+
 function updateLayout() {
     dashboard.style.maxHeight = dashOpen ? dashboard.scrollHeight + "px" : "6px";
     toggle.style.top = (dashOpen ? dashboard.scrollHeight : 6) + "px";
@@ -1087,11 +1140,6 @@ function initApp() {
     const savedCollapsed = localStorage.getItem("collapsed");
     if (savedCollapsed) collapsed = new Set(JSON.parse(savedCollapsed));
     if (entries.length === 0) entries.push(createEntry("", 0));
-
-const dashboard = document.getElementById("dashboard");
-const toggle = document.getElementById("dashboard-toggle");
-
-let dashOpen = true;
 
 toggle.addEventListener("click", () => {
     dashOpen = !dashOpen;

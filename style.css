@@ -547,3 +547,22 @@ body {
 #btn-toggle-archived {
     font-size: 16px;
 }
+/* ---- Search ---- */
+.search-input {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    color: #d4d4d4;
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    outline: none;
+    width: 0px;
+    opacity: 0;
+    transition: width 0.2s ease, opacity 0.2s ease;
+    overflow: hidden;
+}
+
+.search-input:focus {
+    border-color: #a9e746;
+}
