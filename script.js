@@ -814,37 +814,6 @@ function formatDuration(mins) {
     return `${String(d).padStart(3, "0")}D ${String(h).padStart(2, "0")}H ${String(m).padStart(2, "0")}M`;
 }
 
-function initApp() {
-    // Load from localStorage as fallback
-    const saved = localStorage.getItem("entries");
-    if (saved) entries = JSON.parse(saved);
-    const savedCollapsed = localStorage.getItem("collapsed");
-    if (savedCollapsed) collapsed = new Set(JSON.parse(savedCollapsed));
-    if (entries.length === 0) entries.push(createEntry("", 0));
-
-const dashboard = document.getElementById("dashboard");
-const toggle = document.getElementById("dashboard-toggle");
-
-let dashOpen = true;
-
-function updateLayout() {
-    dashboard.style.maxHeight = dashOpen ? dashboard.scrollHeight + "px" : "6px";
-    toggle.style.top = (dashOpen ? dashboard.scrollHeight : 6) + "px";
-    toggle.textContent = dashOpen ? "▲" : "▼";
-    document.getElementById("app").style.paddingTop = (dashOpen ? dashboard.scrollHeight + 6 : 14) + "px";
-}
-
-toggle.addEventListener("click", () => {
-    dashOpen = !dashOpen;
-    dashboard.classList.toggle("collapsed", !dashOpen);
-    updateLayout();
-});
-
-setTimeout(updateLayout, 100);
-window.addEventListener("resize", updateLayout);
-
-// ---- Stats + Tag Filter ----
-
 function computeStats() {
     const tagTotals = {};
     for (const entry of entries) {
@@ -1103,6 +1072,38 @@ function renderStats() {
 
     setTimeout(updateLayout, 0);
 }
+
+function updateLayout() {
+    dashboard.style.maxHeight = dashOpen ? dashboard.scrollHeight + "px" : "6px";
+    toggle.style.top = (dashOpen ? dashboard.scrollHeight : 6) + "px";
+    toggle.textContent = dashOpen ? "▲" : "▼";
+    document.getElementById("app").style.paddingTop = (dashOpen ? dashboard.scrollHeight + 6 : 14) + "px";
+}
+
+function initApp() {
+    // Load from localStorage as fallback
+    const saved = localStorage.getItem("entries");
+    if (saved) entries = JSON.parse(saved);
+    const savedCollapsed = localStorage.getItem("collapsed");
+    if (savedCollapsed) collapsed = new Set(JSON.parse(savedCollapsed));
+    if (entries.length === 0) entries.push(createEntry("", 0));
+
+const dashboard = document.getElementById("dashboard");
+const toggle = document.getElementById("dashboard-toggle");
+
+let dashOpen = true;
+
+toggle.addEventListener("click", () => {
+    dashOpen = !dashOpen;
+    dashboard.classList.toggle("collapsed", !dashOpen);
+    updateLayout();
+});
+
+setTimeout(updateLayout, 100);
+window.addEventListener("resize", updateLayout);
+
+// ---- Stats + Tag Filter ----
+
 
 renderStats();
 initDropdownListener();
