@@ -1133,6 +1133,38 @@ function updateLayout() {
     document.getElementById("app").style.paddingTop = (dashOpen ? dashboard.scrollHeight + 6 : 14) + "px";
 }
 
+function exportToMarkdown() {
+    const lines = [];
+    const docName = document.getElementById("file-dropdown")?.selectedOptions[0]?.text || "export";
+
+    for (const entry of entries) {
+        const text = entry.text.trim();
+        if (!text) continue;
+
+        if (isSection(entry)) {
+            // ## Section → markdown header based on level
+            const level = getSectionLevel(entry);
+            const label = text.replace(/^#{1,3}\s*/, "");
+            lines.push(`\n${"#".repeat(level)} ${label}\n`);
+        } else if (entry.indent === 0) {
+            // Day line → h2
+            lines.push(`\n## ${text}\n`);
+        } else {
+            // Nested items → indented bullets
+            const indent = "  ".repeat(entry.indent - 1);
+            lines.push(`${indent}- ${text}`);
+        }
+    }
+
+    const markdown = lines.join("\n");
+    const blob = new Blob([markdown], { type: "text/markdown" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${docName}.md`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
 function initApp() {
     // Load from localStorage as fallback
     const saved = localStorage.getItem("entries");
@@ -1162,5 +1194,8 @@ setInterval(() => {
     if (Object.keys(timers).length > 0) renderStats();
 }, 60000);
 initDashboardButtons();
+
+document.getElementById("btn-export").addEventListener("click", exportToMarkdown);
+
 markClean();
 }
