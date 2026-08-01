@@ -32,6 +32,11 @@ body {
     border-bottom: 2px solid #555;
 }
 
+.line.duplicating {
+    opacity: 0.4;
+    outline: 1px dashed #a9e746;
+}
+
 .line.selected {
     background: #2d2d2d;
 }

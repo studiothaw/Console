@@ -486,10 +486,10 @@ function render() {
 
             let didMove = false;
 
-            function onPointerMove(e) {
+           function onPointerMove(e) {
                 didMove = true;
                 [...app.children].filter(r => !r.classList.contains("phantom-line")).forEach((r, i) => {
-                    if (selectedIndices.has(i)) r.classList.add("dragging");
+                    if (selectedIndices.has(i)) r.classList.add(e.altKey ? "duplicating" : "dragging");
                 });
                 document.querySelectorAll(".drag-over").forEach(r => r.classList.remove("drag-over"));
                 const target = document.elementFromPoint(e.clientX, e.clientY);
@@ -515,6 +515,7 @@ function render() {
                 dot.removeEventListener("pointermove", onPointerMove);
                 dot.removeEventListener("pointerup", onPointerUp);
                 document.querySelectorAll(".line.dragging").forEach(r => r.classList.remove("dragging"));
+                document.querySelectorAll(".line.duplicating").forEach(r => r.classList.remove("duplicating"));
                 document.querySelectorAll(".drag-over").forEach(r => r.classList.remove("drag-over"));
                 document.querySelectorAll(".drag-over-bottom").forEach(r => r.classList.remove("drag-over-bottom"));
 
@@ -551,8 +552,14 @@ function render() {
                     }
                 }
 
-                const toMove = [...realIndicesToMove].sort((a, b) => a - b).map(i => entries[i]);
-                const remaining = entries.filter((_, i) => !realIndicesToMove.has(i));
+                const isDuplicate = e.altKey;
+                const toMove = [...realIndicesToMove].sort((a, b) => a - b).map(i => ({
+                    ...entries[i],
+                    id: Date.now() + Math.random()
+                }));
+                const remaining = isDuplicate
+                    ? [...entries]
+                    : entries.filter((_, i) => !realIndicesToMove.has(i));
 
                 let insertAt;
                 if (targetRealIndex === null) {
@@ -1045,10 +1052,25 @@ function renderStats() {
 
     // Add Week handler
     document.getElementById("btn-add-week-inline").addEventListener("click", () => {
-        const today = new Date();
+        // find the latest existing day entry date
+        let latestDate = new Date();
+        latestDate.setHours(0, 0, 0, 0);
+
+        for (const entry of entries) {
+            if (entry.indent !== 0 || isSection(entry)) continue;
+            const m = entry.text.match(/^(\d{4})\s+([A-Z]{3})\s+(\d{2})/);
+            if (!m) continue;
+            const d = new Date(parseInt(m[1]), MONTHS.indexOf(m[2]), parseInt(m[3]));
+            if (d > latestDate) latestDate = d;
+        }
+
+        // add 7 days starting from day after latest
+        const start = new Date(latestDate);
+        start.setDate(start.getDate() + 1);
+
         for (let i = 0; i < 7; i++) {
-            const d = new Date(today);
-            d.setDate(today.getDate() + i);
+            const d = new Date(start);
+            d.setDate(start.getDate() + i);
             const formatted = formatDate(d);
             const exists = entries.some(e => e.indent === 0 && !isSection(e) && e.text.startsWith(formatted));
             if (!exists) entries.push(createEntry(formatted, 0));
